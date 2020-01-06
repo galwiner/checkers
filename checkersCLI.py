@@ -1,4 +1,5 @@
 import argparse
+
 import checkersEngine as ce
 import test_checkersEngine as tests
 
@@ -11,12 +12,12 @@ parser.add_argument("-s", "--step", action="store_true", help="step through the 
 
 args = parser.parse_args()
 
-if args.file==None:
+if (args.file == None) & (not args.tests):
     parser.print_help()
 if args.tests:
     tests.run_tests_extern()
 if args.step:
-    ce.PLAY_BY_PLAY=True
+    ce.PLAY_BY_PLAY = True
 if args.print_board:
     ce.SHOW_BOARD = True
 if args.verbose:
@@ -24,4 +25,3 @@ if args.verbose:
 ce.playGame(args.file)
 # b = makeBoard()
 # showBoard(b)
-
