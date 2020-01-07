@@ -13,7 +13,7 @@ You can run `python checkersCLI.py` to get usage instructions.
 
 `python checkersCLI.py -b -f "filename"` runs the game and shows a board on each move
 
-`python checkersCLI.py -b -f "filename"` runs the game and shows a board on each move
+`python checkersCLI.py -s -b -f "filename"` runs the game and shows a board on each move
 
 
 
