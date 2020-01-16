@@ -134,17 +134,41 @@ def isGameOver(board):
 
 def getPieceColor(board, pos):
     """get the piece color in pos"""
-    return board[pos[0], pos[1]]
+    return board[pos[1], pos[0]]
 
 
 def getMoveDir(piece):
     if piece == WHITE:
         mov_dir = 1
-    if piece == BLACK:
+    elif piece == BLACK:
         mov_dir = -1
     else:
         mov_dir = 0
     return mov_dir
+
+
+def hasCapture(board, pos):
+    """does this piece in pos have any forward capture moves?"""
+    piece = getPieceColor(board, pos)
+    mov_dir = getMoveDir(piece)
+    if piece == EMPTY:
+        return False
+    for ind in [1, -1]:
+        try:
+            if (pos[0] + ind < 0) | (pos[1] + mov_dir <0) | (pos[0] + 2*ind < 0) | (pos[1] + 2*mov_dir <0):
+                continue
+            if (board[pos[1] + mov_dir, pos[0] + ind] == (3 - piece)) & (board[pos[1] + 2*mov_dir, pos[0] + 2*ind] == EMPTY):
+                if VERBOSE:
+                    print(f'{piece} has capture in {ind} direction. pos {pos[1]},{pos[0]}')
+                return True
+        except IndexError:
+            if VERBOSE:
+                print(f'Did not find a capture option in ind {ind} for piece {piece}')
+
+        if VERBOSE:
+            print(f'Did not find a capture option for piece {piece} in ind {ind} for piece {piece}, movdir={mov_dir}')
+
+    return False
 
 
 def getEnemyNeighbours(board, pos):
@@ -160,7 +184,7 @@ def getEnemyNeighbours(board, pos):
                 neighbours.append(np.array((pos[0] + mov_dir, pos[1] + ind)))
                 if VERBOSE:
                     print(neighbours)
-        except IndexError as e:
+        except IndexError:
             pass
     return neighbours
 
@@ -169,8 +193,6 @@ def isCapture(board, move):
     """Check if the requested move is a capture move"""
     if abs(move[0] - move[2]) == 2:
         if abs(move[1] - move[3]) == 2:
-            if VERBOSE:
-                print('capture move!')
             return True
         else:
             raise IndexError("Bad capture  move!")
@@ -194,12 +216,18 @@ def makeMove(board, move):
         raise IndexError('Target position is not empty!')
     else:
         piece = new_board[move[1], move[0]]
+        if VERBOSE:
+            if piece == WHITE:
+                print("white plays!")
+            else:
+                print("black plays!")
+
         new_board[move[1], move[0]] = EMPTY
         new_board[move[3], move[2]] = piece
         if isCapture(board, move):
             cap_coords = getCaptureCoords(board, move)
             if VERBOSE:
-                print('piece captured! ' + str(cap_coords))
+                print(f'{piece} captured a piece in pos ' + str(cap_coords))
 
             new_board[cap_coords[1], cap_coords[0]] = EMPTY
     return new_board
@@ -212,7 +240,7 @@ def testWinner(board):
     if np.sum(board == WHITE) < np.sum(board == BLACK):
         return "black wins"
     else:
-        return "draw!"
+        return "tie"
 
 
 def playGame(file):
@@ -223,15 +251,41 @@ def playGame(file):
         return e.args[0]
 
     board = makeBoard()
-    for move in moves:
+    currPlayer = WHITE
+    for moveNumber, move in enumerate(moves):
+        if VERBOSE:
+            print(f'moveNumber is {moveNumber+1}: {move}')
+        if hasCapture(board, move) & isCapture(board, move) or not hasCapture(board, move):
+            pass
+        else:
+            print("incomplete game")
+            return "incomplete game"
+        piece=getPieceColor(board, move)
+        if currPlayer == piece:
+            if VERBOSE:
+                print('current player matches piece color!')
+
+        else:
+            if VERBOSE:
+                print(f'Bad move, quitting: current player is {currPlayer}. piece color is {piece}!')
+
+            return "incomplete game"
+
         new_board = makeMove(board, move)
         if SHOW_BOARD:
             showBoard(new_board)
         if PLAY_BY_PLAY:
-            keystroke = input("Press enter to show the next move or q and enter to quit.")
+            keystroke = input(
+                "Press enter to show the next move or q and enter to quit.")
             if keystroke == 'q':
                 break
+
+        if isCapture(board,move) & (not hasCapture(new_board, move[2:4])) or (not isCapture(board,move)):
+            currPlayer = 3-currPlayer
+            if VERBOSE:
+                print(f'End of {3-currPlayer} turn. currPlayer is {currPlayer}')
         board = new_board
+
     if VERBOSE:
         print(testWinner(board))
     if isGameOver(board):
@@ -257,6 +311,9 @@ def showBoard(board):
 
 
 if __name__ == "__main__":
+    SHOW_BOARD = False
+    VERBOSE = False
     b = makeBoard()
-    showBoard(b)
-    playGame('illegalEntries.txt')
+    # showBoard(b)
+    playGame('white.txt')
+    # playGame('black.txt')
