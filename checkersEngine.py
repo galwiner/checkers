@@ -138,6 +138,7 @@ def getPieceColor(board, pos):
 
 
 def getMoveDir(piece):
+    """returns the row progress direction. white moves in +1, black in -1"""
     if piece == WHITE:
         mov_dir = 1
     elif piece == BLACK:
@@ -155,9 +156,11 @@ def hasCapture(board, pos):
         return False
     for ind in [1, -1]:
         try:
-            if (pos[0] + ind < 0) | (pos[1] + mov_dir <0) | (pos[0] + 2*ind < 0) | (pos[1] + 2*mov_dir <0):
+            if (pos[0] + ind < 0) | (pos[1] + mov_dir < 0) | (pos[0] + 2 * ind < 0) | (
+                    pos[1] + 2 * mov_dir < 0):  # if out of bounds, cannot be a capture
                 continue
-            if (board[pos[1] + mov_dir, pos[0] + ind] == (3 - piece)) & (board[pos[1] + 2*mov_dir, pos[0] + 2*ind] == EMPTY):
+            if (board[pos[1] + mov_dir, pos[0] + ind] == (3 - piece)) & (
+                    board[pos[1] + 2 * mov_dir, pos[0] + 2 * ind] == EMPTY):
                 if VERBOSE:
                     print(f'{piece} has capture in {ind} direction. pos {pos[1]},{pos[0]}')
                 return True
@@ -172,7 +175,7 @@ def hasCapture(board, pos):
 
 
 def getEnemyNeighbours(board, pos):
-    """get the list of enemies at the current position"""
+    """get the list of enemies at the current position. NOT USED"""
     piece = getPieceColor(board, pos)
     mov_dir = getMoveDir(piece)
     neighbours = []
